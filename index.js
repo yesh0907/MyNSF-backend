@@ -3,9 +3,14 @@ import cheerio from 'cheerio';
 import express from 'express';
 import lodash from 'lodash';
 
+const date = new Date();
+const year = date.getFullYear();
+const month = date.getMonth() + 1;
+const day = date.getDate();
+
 const baseURL = 'https://www.timeanddate.com/date/';
-const duration = 'durationresult.html?d1=7&m1=7&y1=2019&d2=31&m2=7&y2=2020&ti=on&';
-const workdays = 'workdays.html?d1=7&m1=7&y1=2019&d2=31&m2=7&y2=2020'
+const duration = `durationresult.html?d1=${day}&m1=${month}&y1=${year}&d2=31&m2=7&y2=2020&ti=on&`;
+const workdays = `workdays.html?d1=${day}&m1=${month}&y1=${year}&d2=31&m2=7&y2=2020`;
 const getDays = async () => {
     const html = await request_promise(baseURL + duration);
     const days = cheerio('div.eight.columns>h2', html).text().trim().replace(/\D/gm, "");
@@ -24,7 +29,7 @@ const getWorkingDays = async () => {
 
 const app = express();
 
-app.get('/days', async (req, res, next) => {
+app.get('/', async (req, res, next) => {
     try {
         const days = await getDays();
         const wd = await getWorkingDays();
@@ -36,6 +41,4 @@ app.get('/days', async (req, res, next) => {
     }
 });
 
-app.listen(process.env.PORT, () =>
-    console.log(`Listening on port ${process.env.PORT}!`),
-);
+module.exports = app;

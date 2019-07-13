@@ -18,9 +18,14 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var date = new Date();
+var year = date.getFullYear();
+var month = date.getMonth() + 1;
+var day = date.getDate();
+
 var baseURL = 'https://www.timeanddate.com/date/';
-var duration = 'durationresult.html?d1=7&m1=7&y1=2019&d2=31&m2=7&y2=2020&ti=on&';
-var workdays = 'workdays.html?d1=7&m1=7&y1=2019&d2=31&m2=7&y2=2020';
+var duration = 'durationresult.html?d1=' + day + '&m1=' + month + '&y1=' + year + '&d2=31&m2=7&y2=2020&ti=on&';
+var workdays = 'workdays.html?d1=' + day + '&m1=' + month + '&y1=' + year + '&d2=31&m2=7&y2=2020';
 var getDays = async function getDays() {
     var html = await (0, _requestPromise2.default)(baseURL + duration);
     var days = (0, _cheerio2.default)('div.eight.columns>h2', html).text().trim().replace(/\D/gm, "");
@@ -39,7 +44,7 @@ var getWorkingDays = async function getWorkingDays() {
 
 var app = (0, _express2.default)();
 
-app.get('/days', async function (req, res, next) {
+app.get('/', async function (req, res, next) {
     try {
         var days = await getDays();
         var wd = await getWorkingDays();
@@ -50,6 +55,4 @@ app.get('/days', async function (req, res, next) {
     }
 });
 
-app.listen(process.env.PORT, function () {
-    return console.log('Listening on port ' + process.env.PORT + '!');
-});
+module.exports = app;
