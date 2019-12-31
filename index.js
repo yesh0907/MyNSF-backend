@@ -4,23 +4,24 @@ import express from 'express';
 import lodash from 'lodash';
 
 const date = new Date();
-const year = date.getFullYear();
-const month = date.getMonth() + 1;
-const day = date.getDate();
+const y1 = date.getFullYear();
+const m1 = date.getMonth() + 1;
+const d1 = date.getDate();
 
 const baseURL = 'https://www.timeanddate.com/date/';
-const duration = `durationresult.html?d1=${day}&m1=${month}&y1=${year}&d2=31&m2=7&y2=2020&ti=on&`;
-const workdays = `workdays.html?d1=${day}&m1=${month}&y1=${year}&d2=31&m2=7&y2=2020`;
-const getDays = async () => {
-    const html = await request_promise(baseURL + duration);
+const duration = (d2, m2, y2) => (`durationresult.html?d1=${d1}&m1=${m1}&y1=${y1}&d2=${d2}&m2=${m2}&y2=${y2}&ti=on&`);
+const workdays = (d2, m2, y2) => (`workdays.html?d1=${d1}&m1=${m1}&y1=${y1}&d2=${d2}&m2=${m2}&y2=${y2}`);
+
+const getDays = async (d2, m2, y2) => {
+    const html = await request_promise(baseURL + duration(d2, m2, y2));
     const days = cheerio('div.eight.columns>h2', html).text().trim().replace(/\D/gm, "");
     return new Promise(resolve => {
         resolve({"days": days});
     });
 }
 
-const getWorkingDays = async () => {
-    const html = await request_promise(baseURL + workdays);
+const getWorkingDays = async (d2, m2, y2) => {
+    const html = await request_promise(baseURL + workdays(d2, m2, y2));
     const wd_days= cheerio('div.re-result.five.columns>h2', html).text().trim().replace(/\D/gm, "");
     return new Promise(resolve => {
         resolve({"wd_days": wd_days});
@@ -31,8 +32,9 @@ const app = express();
 
 app.get('/', async (req, res, next) => {
     try {
-        const days = await getDays();
-        const wd = await getWorkingDays();
+        const {d2, m2, y2} = req.query;
+        const days = await getDays(d2, m2, y2);
+        const wd = await getWorkingDays(d2, m2, y2);
         const data = lodash.merge(days, wd);
         res.json(data);
     }
